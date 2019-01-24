@@ -16,7 +16,7 @@
 # can also be detected.
 # One of {x, k, gnome-}screensaver must be installed.
 
-# HOW TO USE: 
+# HOW TO USE:
 # "./lightson+ -d 2 &" will check every 2 minutes if Mplayer, VLC, Firefox or
 # Chromium are fullscreen and delay screensaver and Power Management if so.
 # If you don't pass an argument, the checks are done every minute.
@@ -111,11 +111,11 @@ checkFullscreen() {
         active_win_id=`DISPLAY=$realdisp.${display} xprop -root _NET_ACTIVE_WINDOW`
         active_win_id=${active_win_id##*# }
         active_win_id=${active_win_id:0:9} # eliminate potentially trailing spaces
-        
+
         top_win_id=`DISPLAY=$realdisp.${display} xprop -root _NET_CLIENT_LIST_STACKING`
         top_win_id=${active_win_id##*, }
         top_win_id=${top_win_id:0:9} # eliminate potentially trailing spaces
-        
+
         # Check if Active Window (the foremost window) is in fullscreen state
         if [ ${#active_win_id} -ge 3 ]; then
             isActiveWinFullscreen=`DISPLAY=$realdisp.${display} xprop -id $active_win_id | grep _NET_WM_STATE_FULLSCREEN`
@@ -127,7 +127,7 @@ checkFullscreen() {
         else
             isTopWinFullscreen=""
         fi
-        
+
         if [[ "$isActiveWinFullscreen" = *NET_WM_STATE_FULLSCREEN* ]] || [[ "$isTopWinFullscreen" = *NET_WM_STATE_FULLSCREEN* ]]; then
             isAppRunning && delayScreensaver
         fi
@@ -140,7 +140,7 @@ checkFullscreen() {
 isAppRunning() {
     # Get title of active window
     active_win_title=`xprop -id $active_win_id | grep "WM_CLASS(STRING)" | sed 's/^.*", //;s/"//g'`
-    
+
     case "$active_win_title" in
     *[Cc]hromium*)
         [ "$chromium_flash_detection" = 1 ] && [ `pgrep -fc "chromium --type=ppapi"` -ge 1 ] && return 0
@@ -215,7 +215,7 @@ delayScreensaver() {
     "freedesktop-screensaver" )
         dbus-send --session --reply-timeout=2000 --type=method_call --dest=org.freedesktop.ScreenSaver /ScreenSaver org.freedesktop.ScreenSaver.SimulateUserActivity;;
     esac
-    
+
     # Check if DPMS is on. If it is, deactivate and reactivate again. If it is not, do nothing.
     dpmsStatus=`xset -q | grep -c 'DPMS is Enabled'`
     [ "$dpmsStatus" = 1 ] && xset -dpms && xset dpms
@@ -277,7 +277,7 @@ while [ -n "$1" ]; do
         * )
             die "Invalid argument. See -h, --help for more information.";;
     esac
-    
+
     # Arguments must always be passed in tuples
     shift 2
 done

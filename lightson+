@@ -28,6 +28,7 @@ vlc_detection=1
 totem_detection=1
 firefox_flash_detection=1
 chromium_flash_detection=1
+focused_window_detection=1
 #chrome_app_name="Netflix"
 webkit_flash_detection=1
 html5_detection=1
@@ -297,6 +298,8 @@ while [ -n "$1" ]; do
             checkBool "$@"; firefox_flash_detection=$2;;
         "-cf" | "--chromium-flash" )
             checkBool "$@"; chromium_flash_detection=$2;;
+        "-fw" | "--focused-window" )
+            checkBool "$@"; focused_window_detection=$2;;
         "-wf" | "--webkit-flash" )
             checkBool "$@"; webkit_flash_detection=$2;;
         "-h5" | "--html5" )
@@ -319,7 +322,8 @@ done
 delay=$[delay*60-10]
 echo "Start lightson+ mainloop"
 while true; do
-    [ -f "$inhibitfile" ] && delayScreensaver || checkFullscreen || checkFocusedWindow
+    [ -f "$inhibitfile" ] && delayScreensaver || checkFullscreen \
+	|| ( if [[ $focused_window_detection = 1 ]]; then checkFocusedWindow; fi )
     sleep $delay
 done
 

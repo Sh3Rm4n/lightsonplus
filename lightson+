@@ -104,6 +104,36 @@ else
     die "No screensaver detected"
 fi
 
+checkFocusedWindow() {
+    # loop through every display looking for a fullscreen window
+    for display in $displays; do
+        # get id of active window and clean output
+        active_win_id=`DISPLAY=$realdisp.${display} xprop -root _NET_ACTIVE_WINDOW`
+        active_win_id=${active_win_id##*# }
+        active_win_id=${active_win_id:0:9} # eliminate potentially trailing spaces
+
+        top_win_id=`DISPLAY=$realdisp.${display} xprop -root _NET_CLIENT_LIST_STACKING`
+        top_win_id=${active_win_id##*, }
+        top_win_id=${top_win_id:0:9} # eliminate potentially trailing spaces
+
+        # Check if Active Window (the foremost window) is in fullscreen state
+        if [ ${#active_win_id} -ge 3 ]; then
+            isActiveWinFocused=`DISPLAY=$realdisp.${display} xprop -id $active_win_id | grep _NET_WM_STATE_FOCUSED`
+        else
+            isActiveWinFocused=""
+        fi
+        if [ ${#top_win_id} -ge 3 ]; then
+            isTopWinFocused=`DISPLAY=$realdisp.${display} xprop -id $top_win_id | grep _NET_WM_STATE_FOCUSED`
+        else
+            isTopWinFocused=""
+        fi
+
+        if [[ "$isActiveWinFocused" = *NET_WM_STATE_FOCUSED* ]] || [[ "$isTopWinFocused" = *NET_WM_STATE_FOCUSED* ]]; then
+            isAppRunning && delayScreensaver
+        fi
+    done
+}
+
 checkFullscreen() {
     # loop through every display looking for a fullscreen window
     for display in $displays; do
@@ -289,7 +319,7 @@ done
 delay=$[delay*60-10]
 echo "Start lightson+ mainloop"
 while true; do
-    [ -f "$inhibitfile" ] && delayScreensaver || checkFullscreen
+    [ -f "$inhibitfile" ] && delayScreensaver || checkFullscreen || checkFocusedWindow
     sleep $delay
 done
 

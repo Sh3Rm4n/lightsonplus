@@ -196,7 +196,10 @@ isAppRunning() {
 checkAudio() {
     # Check if application is streaming sound to PulseAudio
 	[ $audio_detection = 0 ] && return 0
-	pacmd list-sink-inputs | grep -Eiq "application.name = .*$1.*"
+	# pacmd list-sink-inputs | grep -Eiq "application.name = .*$1.*"
+	# check if binary name is listed as sink input and check if state equal 'RUNNING'
+	pacmd list-sink-inputs | awk "/state:/ {print \$2} /application.process.binary = .*$1/ {print \$3};" \
+	    | tail -n 2 | tr '\n' ' ' | grep $1 | grep -q RUNNING
 }
 
 delayScreensaver() {
